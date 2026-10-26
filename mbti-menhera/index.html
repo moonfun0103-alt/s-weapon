@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MBTI 멘헤라 테스트</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 1. 시작 화면 -->
+  <div id="start-screen" class="screen active">
+    <h1>나의 멘헤라 성향은?</h1>
+    <p>MBTI와 결합된 나의 숨겨진 의존도를 알아보세요.</p>
+    <button onclick="startTest()">테스트 시작하기</button>
+  </div>
+
+  <!-- 2. 질문 화면 -->
+  <div id="question-screen" class="screen">
+    <h2 id="question-text">질문이 여기에 표시됩니다.</h2>
+    <div id="answer-buttons">
+      <!-- JavaScript를 통해 버튼이 생성될 위치 -->
+    </div>
+  </div>
+
+  <!-- 3. 로딩 화면 (분석 중 연출) -->
+  <div id="loading-screen" class="screen">
+    <h2>기질 데이터 분석 중...</h2>
+    <p>잠시만 기다려주세요.</p>
+    <!-- 여기에 스피너나 분석과정.png 같은 이미지를 넣을 수 있습니다 -->
+  </div>
+
+  <!-- 4. 결과 화면 -->
+  <div id="result-screen" class="screen">
+    <h2>분석 완료! 당신의 유형은...</h2>
+    <h1 id="result-mbti">MBTI</h1>
+    <p id="result-menhera">멘헤라 수치: 분석결과</p>
+    <!-- 최종 결과 이미지(예: ENFP_high.png)를 띄울 img 태그 -->
+    <img id="result-image" src="" alt="결과 이미지" style="max-width: 100%; display: none;">
+    <button onclick="location.reload()">다시 하기</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
