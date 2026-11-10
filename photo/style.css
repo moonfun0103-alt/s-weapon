@@ -1,0 +1,31 @@
+/* 기본 폰트 설정 및 다크모드 배경 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #0f172a;
+    color: #f8fafc;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* 감성적인 세리프 폰트 */
+.serif-title {
+    font-family: 'Noto Serif KR', serif;
+}
+
+/* 스마트폰 거울 모드를 위한 웹캠 좌우 반전 */
+#webcam {
+    transform: scaleX(-1);
+}
+
+/* 애니메이션 및 커스텀 스타일 보완 */
+@keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

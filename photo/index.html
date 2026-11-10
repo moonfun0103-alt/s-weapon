@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 실시간 패션 피팅 스튜디오</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 구글 폰트 적용 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .serif-title { font-family: 'Noto Serif KR', serif; }
+        /* 카메라 화면 좌우 반전 (거울 모드) */
+        #webcam { transform: scaleX(-1); }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <!-- 메인 앱 컨테이너 -->
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[85vh] max-h-[800px]">
+        
+        <!-- 상단 헤더 -->
+        <header class="p-4 border-b border-slate-800 text-center bg-slate-950/50">
+            <h1 class="serif-title text-xl font-bold tracking-wide text-amber-400">AI VIRTUAL FIT</h1>
+            <p class="text-xs text-slate-400 mt-1">카메라 배경 분석 및 맞춤형 스타일링</p>
+        </header>
+
+        <!-- 컨텐츠 영역 (카메라 및 결과) -->
+        <div class="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
+            <!-- 웹캠 영상 출력 요소 -->
+            <video id="webcam" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+            
+            <!-- AI 분석 오버레이 (로딩 및 스캔 효과) -->
+            <div id="ai-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center hidden z-10">
+                <div class="w-16 h-16 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p id="ai-status-text" class="text-sm font-medium text-amber-200 animate-pulse">주변 배경 및 무드 분석 중...</p>
+            </div>
+
+            <!-- AI 추천 의상 결과 오버레이 (촬영 후 표시) -->
+            <div id="result-overlay" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-6 hidden z-20 flex flex-col items-center text-center">
+                <span class="bg-amber-400/20 text-amber-300 text-xs px-3 py-1 rounded-full font-medium mb-2 border border-amber-400/30">✨ AI 스타일링 완료</span>
+                <h3 id="outfit-title" class="text-lg font-bold text-white mb-1">모던 시티 캐주얼</h3>
+                <p id="outfit-desc" class="text-xs text-slate-300 mb-4 leading-relaxed">현재 도심의 야경과 차분한 무드에 어울리는 차콜 트렌치코트 조합입니다.</p>
+                <button onclick="resetCamera()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-medium transition-colors border border-slate-700">
+                    다시 촬영하기
+                </button>
+            </div>
+        </div>
+
+        <!-- 하단 컨트롤 영역 -->
+        <div class="p-5 bg-slate-950 border-t border-slate-800 flex items-center justify-around">
+            <button onclick="switchCamera()" class="p-3 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors" title="카메라 전환">
+                🔄
+            </button>
+            <!-- 캡처 및 AI 분석 실행 버튼 -->
+            <button onclick="captureAndAnalyze()" id="capture-btn" class="w-16 h-16 bg-gradient-to-tr from-amber-500 to-amber-300 rounded-full shadow-lg flex items-center justify-center text-slate-950 hover:scale-105 active:scale-95 transition-all">
+                📸
+            </button>
+            <button onclick="toggleFlash()" class="p-3 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors" title="필터 모드">
+                🎨
+            </button>
+        </div>
+    </div>
+
+    <!-- 자바스크립트 로직 -->
+    <script>
+        const videoElement = document.getElementById('webcam');
+        let currentStream = null;
+        let useFrontCamera = true;
+
+        // 웹캠 시작 함수
+        async function startCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: { facingMode: useFrontCamera ? 'user' : 'environment' },
+                audio: false
+            };
+
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = currentStream;
+            } catch (err) {
+                console.error("카메라 접근 실패:", err);
+                alert("카메라 권한이 거부되었거나 지원하지 않는 기기입니다. 브라우저 설정을 확인해주세요.");
+            }
+        }
+
+        // 전면/후면 카메라 전환
+        function switchCamera() {
+            useFrontCamera = !useFrontCamera;
+            startCamera();
+        }
+
+        // 캡처 및 AI 분석 시뮬레이션
+        function captureAndAnalyze() {
+            const overlay = document.getElementById('ai-overlay');
+            const statusText = document.getElementById('ai-status-text');
+            const resultOverlay = document.getElementById('result-overlay');
+            const captureBtn = document.getElementById('capture-btn');
+
+            overlay.classList.remove('hidden');
+            captureBtn.style.pointerEvents = 'none';
+
+            // AI 분석 단계 시뮬레이션 메시지 변경
+            const steps = [
+                "📷 카메라 프레임 캡처 완료...",
+                "🌐 주변 배경 공간 및 조명 분석 중...",
+                "🎨 사용자의 분위기와 어울리는 코디 매칭 중..."
+            ];
+
+            let stepIdx = 0;
+            const interval = setInterval(() => {
+                stepIdx++;
+                if (stepIdx < steps.length) {
+                    statusText.innerText = steps[stepIdx];
+                }
+            }, 700);
+
+            // 2.2초 후 결과 노출
+            setTimeout(() => {
+                clearInterval(interval);
+                overlay.classList.add('hidden');
+                
+                // 무작위 추천 결과 매칭 예시
+                const resultsPool = [
+                    { title: "어반 미니멀 룩", desc: "차분한 주변 톤에 맞춘 뉴트럴 컬러 슬랙스와 오버핏 자켓 조합입니다." },
+                    { title: "소프트 캐주얼 데일리", desc: "편안하면서도 세련된 실루엣을 강조하는 니트와 와이드 팬츠 코디입니다." },
+                    { title: "스트릿 빈티지 무드", desc: "활동성과 개성을 살려주는 레이어드 아우터 스타일링입니다." }
+                ];
+                const randomRes = resultsPool[Math.floor(Math.random() * resultsPool.length)];
+
+                document.getElementById('outfit-title').innerText = randomRes.title;
+                document.getElementById('outfit-desc').innerText = randomRes.desc;
+
+                resultOverlay.classList.remove('hidden');
+            }, 2200);
+        }
+
+        // 초기화 및 다시 시작
+        function resetCamera() {
+            document.getElementById('result-overlay').classList.add('hidden');
+            document.getElementById('capture-btn').style.pointerEvents = 'auto';
+        }
+
+        // 페이지 로드 시 카메라 즉시 실행
+        window.addEventListener('load', () => {
+            startCamera();
+        });
+    </script>
+</body>
+</html>
